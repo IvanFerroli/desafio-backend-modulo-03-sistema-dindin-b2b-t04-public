@@ -1,5 +1,7 @@
 ![](https://i.imgur.com/xG74tOh.png)
 
+DUPLA: IVANILSON F. D. OLIVEIRA e LUCAS M. D. SOUZA
+
 # Desafio Módulo 3 - Backend
 
 Seu papel é construir uma RESTful API que permita:
