@@ -1,11 +1,12 @@
 const { Pool } = require('pg');
+const { userBd, hostBd, databaseBd, passwordBd, portBd } = require('../dadosSensiveis');
 
 const conectarBanco = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'dindin',
-    password: 'Pos5428*',
-    port: 5432
+    user: userBd,
+    host: hostBd,
+    database: databaseBd,
+    password: passwordBd,
+    port: portBd
 
 });
 
