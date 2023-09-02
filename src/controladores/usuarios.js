@@ -29,7 +29,6 @@ const cadastrarUsuario = async (req, res) => {
         return res.status(201).json(cadastroFeito);
 
     } catch (error) {
-        console.log(error.message);
         return res.status(500).json({ mensagem: "Erro interno do servidor." })
     }
 
@@ -65,12 +64,20 @@ const login = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error.message);
         return res.status(500).json({ mensagem: "Erro interno do servidor." });
     };
 };
 
+
+const detalharUsuario = async (req, res) => {
+    if (!req.usuarioLogado) {
+        return res.status(401).json({ mensagem: "Para acessar este recurso um token de autenticação válido deve ser enviado." });
+    };
+    return res.status(200).json(req.usuarioLogado);
+};
+
 module.exports = {
     cadastrarUsuario,
-    login
+    login,
+    detalharUsuario
 }
