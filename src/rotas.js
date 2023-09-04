@@ -2,7 +2,8 @@ const express = require('express');
 const { cadastrarUsuario, login, detalharUsuario } = require('./controladores/usuarios');
 const verificarLogin = require('./intermediarios/verificarLogin');
 const { listarCategorias } = require('./controladores/categorias');
-const { listarTransacoes, encontrarTransacaoPorId, editarTransacao } = require('./controladores/transacoes');
+const { listarTransacoes, encontrarTransacaoPorId, editarTransacao } = require('./controladores/transacoes.js');
+const { removerTransacao } = require('./controladores/transacoes.js');
 
 const rotas = express();
 
@@ -28,5 +29,7 @@ rotas.get('/transacao/:id', async (req, res) => {
   }
 });
 rotas.put('/transacao/:id', editarTransacao);
+rotas.delete('/transacao/:id', removerTransacao);
+
 
 module.exports = rotas;

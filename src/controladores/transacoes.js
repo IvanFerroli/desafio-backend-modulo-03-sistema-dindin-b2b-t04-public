@@ -81,9 +81,33 @@ const editarTransacao = async (req, res) => {
       return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
     }
   };
+
+const conectarBanco = require('../config/dadosDoBanco');
+const { encontrarTransacaoPorId } = require('../repositorios/transacoes');
+
+const removerTransacao = async (req, res) => {
+  const { id } = req.params; 
+
+  try {
+
+    const transacaoExistente = await encontrarTransacaoPorId(id);
+
+    if (!transacaoExistente) {
+      return res.status(404).json({ mensagem: 'Transação não encontrada.' });
+    }
+
+    const queryRemoverTransacao = 'DELETE FROM transacoes WHERE id = $1';
+    await conectarBanco.query(queryRemoverTransacao, [id]);
+
+    return res.status(204).end();
+  } catch (error) {
+    return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+  }
+};
   
 module.exports = {
     listarTransacoes,
     encontrarTransacaoPorId,
     editarTransacao,
+    removerTransacao,
 };
