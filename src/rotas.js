@@ -20,8 +20,9 @@ rotas.put('/usuario', atualizarUsuario);
 rotas.get('/categoria', listarCategorias);
 rotas.get('/transacao', listarTransacoes);
 rotas.get('/transacao/:id', detalharTransacao);
-
 rotas.post('/transacao', cadastrarTransacao);
+rotas.put('/transacao/:id', editarTransacao);
+
 
 
 
@@ -38,7 +39,6 @@ rotas.post('/transacao', cadastrarTransacao);
 //     return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
 //   }
 // });
-// rotas.put('/transacao/:id', editarTransacao);
 // rotas.delete('/transacao/:id', removerTransacao);
 
 

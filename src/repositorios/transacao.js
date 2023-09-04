@@ -1,18 +1,8 @@
 const conectarBanco = require("../config/dadosDoBanco");
 
-const encontrarTransacaoPorId = async (usuarioId) => {
-    try {
-        const query = 'SELECT * FROM transacoes WHERE id = $1';
-        const { rows, rowCount } = await conectarBanco.query(query, [usuarioId]);
-
-        if (rowCount.length === 0) {
-            return null;
-        }
-
-        return rows[0];
-    } catch (error) {
-        throw error;
-    }
+const encontrarTransacaoPorId = (id) => {
+    const queryEncontrarTransacaoPorId = conectarBanco.query('SELECT * FROM transacoes WHERE id = $1', [id]);
+    return queryEncontrarTransacaoPorId;
 };
 
 

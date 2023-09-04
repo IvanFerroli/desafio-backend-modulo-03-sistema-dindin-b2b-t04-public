@@ -63,7 +63,7 @@ const detalharTransacao = async (req, res) => {
 
         if (rowCount === 0) {
             return res.status(404).json({ mensagem: "Transação não encontrada." });
-        }
+        };
         return res.status(200).json(rows[0]);
     } catch (error) {
         return res.status(500).json({ mensagem: "Erro interno do servidor." });
@@ -87,7 +87,7 @@ const cadastrarTransacao = async (req, res) => {
         };
 
         if (tipo.toLowerCase() !== "entrada" && tipo.toLowerCase() !== "saida") {
-            return res.status(400).json({ mensagem: "Por favro, informe qual é o tipo de transação que você está efetuando." })
+            return res.status(400).json({ mensagem: "Por favro, informe corretamente qual é o tipo de transação que você está efetuando." })
         };
 
         const novosDados = { tipo, descricao, valor, data, categoria_id, usuarioId }
@@ -123,39 +123,54 @@ const cadastrarTransacao = async (req, res) => {
 };
 
 
-// const editarTransacao = async (req, res) => {
-//   const { id } = req.params;
-//   const { descricao, valor, data, categoria_id, tipo } = req.body;
+const editarTransacao = async (req, res) => {
+    const { id } = req.params;
+    const { descricao, valor, data, categoria_id, tipo } = req.body;
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
 
-//   try {
+    if (!descricao || !valor || !data || !categoria_id || !tipo) {
+        return res.status(400).json({ mensagem: "Todos os campos obrigatórios devem ser informados." })
+    };
 
-//     const transacaoExistente = await encontrarTransacaoPorId(id);
+    try {
+        const { rowCount } = await encontrarCategoriaPorId(categoria_id);
+        const { rows: transacaoExistente } = await encontrarTransacaoPorId(id);
 
-//     if (!transacaoExistente) {
-//       return res.status(404).json({ mensagem: 'Transação não encontrada.' });
-//     }
+        if (rowCount < 1) {
+            return res.status(400).json({ mensagem: "A categoria especificada não existe." });
+        }
+        if (transacaoExistente[0].usuario_id !== usuarioId) {
+            return res.status(404).json({ mensagem: "Transação não encontrada." })
+        };
+        if (tipo.toLowerCase() !== "entrada" && tipo.toLowerCase() !== "saida") {
+            return res.status(400).json({ mensagem: "Por favro, informe corretamente qual é o tipo de transação que você está efetuando." })
+        };
 
-//     const queryEditarTransacao = `
-//         UPDATE transacoes
-//         SET descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5
-//         WHERE id = $6
-//         RETURNING *
-//       `;
+        const queryEditarTransacao = `
+        UPDATE transacoes
+        SET descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5
+        WHERE id = $6
+        RETURNING *
+      `;
 
-//     const { rows: transacaoEditada } = await conectarBanco.query(queryEditarTransacao, [
-//       descricao,
-//       valor,
-//       data,
-//       categoria_id,
-//       tipo,
-//       id,
-//     ]);
+        const { rows: transacaoEditada } = await conectarBanco.query(queryEditarTransacao, [
+            descricao,
+            valor,
+            data,
+            categoria_id,
+            tipo,
+            id,
+        ]);
 
-//     return res.status(200).json(transacaoEditada[0]);
-//   } catch (error) {
-//     return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
-//   }
-// };
+        if (rowCount === 0) {
+            return res.status(404).json({ mensagem: "Transação não encontrada." });
+        };
+
+        return res.status(204).json();
+    } catch (error) {
+        return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+    }
+};
 
 // const { encontrarTransacaoPorId } = require('../repositorios/transacoes');
 
@@ -182,8 +197,8 @@ const cadastrarTransacao = async (req, res) => {
 module.exports = {
     listarTransacoes,
     cadastrarTransacao,
-    detalharTransacao
+    detalharTransacao,
+    editarTransacao
     // encontrarTransacaoPorId,
-    // editarTransacao,
     // removerTransacao
 };
