@@ -8,14 +8,17 @@ const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body;
 
     if (!nome || !email || !senha) {
+        console.log("1");
         return res.status(400).json({ mensagem: "Por favor, preencha todos os campos." })
     };
 
     try {
 
         const emailJaCadastrado = await encontrarEmailUsuario(email);
+        console.log("2");
 
         if (emailJaCadastrado.rowCount > 0) {
+            console.log("3");
             return res.status(400).json({ mensagem: "Já existe usuário cadastrado com o e-mail informado." });
         }
 
@@ -25,11 +28,11 @@ const cadastrarUsuario = async (req, res) => {
         const { rows: cadastrosFeito } = await cadastrandoUsuario(novosDados);
         const cadastroFeito = cadastrosFeito[0]
         delete cadastroFeito.senha;
-
+        console.log("4");
         return res.status(201).json(cadastroFeito);
 
     } catch (error) {
-        console.log(error.message);
+        console.log(error.message)
         return res.status(500).json({ mensagem: "Erro interno do servidor." })
     }
 
@@ -65,12 +68,21 @@ const login = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error.message);
+        console.log(error.message)
         return res.status(500).json({ mensagem: "Erro interno do servidor." });
     };
 };
 
+
+const detalharUsuario = async (req, res) => {
+    if (!req.usuarioLogado) {
+        return res.status(401).json({ mensagem: "Para acessar este recurso um token de autenticação válido deve ser enviado." });
+    };
+    return res.status(200).json(req.usuarioLogado);
+};
+
 module.exports = {
     cadastrarUsuario,
-    login
+    login,
+    detalharUsuario
 }
