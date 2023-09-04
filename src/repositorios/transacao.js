@@ -2,6 +2,7 @@ const conectarBanco = require("../config/dadosDoBanco");
 
 const encontrarTransacaoPorId = (id) => {
     const queryEncontrarTransacaoPorId = conectarBanco.query('SELECT * FROM transacoes WHERE id = $1', [id]);
+
     return queryEncontrarTransacaoPorId;
 };
 

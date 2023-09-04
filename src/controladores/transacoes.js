@@ -172,33 +172,37 @@ const editarTransacao = async (req, res) => {
     }
 };
 
-// const { encontrarTransacaoPorId } = require('../repositorios/transacoes');
 
-// const removerTransacao = async (req, res) => {
-//   const { id } = req.params;
+const removerTransacao = async (req, res) => {
+    const { id } = req.params;
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
 
-//   try {
+    try {
 
-//     const transacaoExistente = await encontrarTransacaoPorId(id);
+        const { rows: transacaoExistente, rowCount } = await encontrarTransacaoPorId(id);
 
-//     if (!transacaoExistente) {
-//       return res.status(404).json({ mensagem: 'Transação não encontrada.' });
-//     }
+        if (rowCount < 1) {
+            return res.status(404).json({ mensagem: 'Transação não encontrada.' });
+        };
 
-//     const queryRemoverTransacao = 'DELETE FROM transacoes WHERE id = $1';
-//     await conectarBanco.query(queryRemoverTransacao, [id]);
+        if (transacaoExistente[0].usuario_id !== usuarioId || rowCount < 1) {
+            return res.status(404).json({ mensagem: "Transação não encontrada." })
+        };
 
-//     return res.status(204).end();
-//   } catch (error) {
-//     return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
-//   }
-// };
+        const queryRemoverTransacao = 'DELETE FROM transacoes WHERE id = $1 AND usuario_id = $2';
+        await conectarBanco.query(queryRemoverTransacao, [id, usuarioId]);
+
+        return res.status(204).end();
+    } catch (error) {
+        return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+    }
+};
 
 module.exports = {
     listarTransacoes,
     cadastrarTransacao,
     detalharTransacao,
-    editarTransacao
+    editarTransacao,
+    removerTransacao
     // encontrarTransacaoPorId,
-    // removerTransacao
 };
