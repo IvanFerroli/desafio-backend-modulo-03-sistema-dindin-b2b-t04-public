@@ -31,83 +31,80 @@ const listarTransacoes = async (req, res) => {
     }
 };
 
-const conectarBanco = require('../config/dadosDoBanco');
+// const encontrarTransacaoPorId = async (id) => {
+//   try {
+//     const query = 'SELECT * FROM transacoes WHERE id = $1';
+//     const { rows } = await conectarBanco.query(query, [id]);
 
-const encontrarTransacaoPorId = async (id) => {
-  try {
-    const query = 'SELECT * FROM transacoes WHERE id = $1';
-    const { rows } = await conectarBanco.query(query, [id]);
+//     if (rows.length === 0) {
+//       return null;
+//     }
 
-    if (rows.length === 0) {
-      return null; 
-    }
+//     return rows[0];
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
-    return rows[0]; 
-  } catch (error) {
-    throw error;
-  }
-};
+// const editarTransacao = async (req, res) => {
+//   const { id } = req.params;
+//   const { descricao, valor, data, categoria_id, tipo } = req.body;
 
-const editarTransacao = async (req, res) => {
-    const { id } = req.params; 
-    const { descricao, valor, data, categoria_id, tipo } = req.body; 
-  
-    try {
-      
-      const transacaoExistente = await encontrarTransacaoPorId(id);
-  
-      if (!transacaoExistente) {
-        return res.status(404).json({ mensagem: 'Transação não encontrada.' });
-      }
-  
-            const queryEditarTransacao = `
-        UPDATE transacoes
-        SET descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5
-        WHERE id = $6
-        RETURNING *
-      `;
-  
-      const { rows: transacaoEditada } = await conectarBanco.query(queryEditarTransacao, [
-        descricao,
-        valor,
-        data,
-        categoria_id,
-        tipo,
-        id,
-      ]);
-  
-      return res.status(200).json(transacaoEditada[0]);
-    } catch (error) {
-      return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
-    }
-  };
+//   try {
 
-const conectarBanco = require('../config/dadosDoBanco');
-const { encontrarTransacaoPorId } = require('../repositorios/transacoes');
+//     const transacaoExistente = await encontrarTransacaoPorId(id);
 
-const removerTransacao = async (req, res) => {
-  const { id } = req.params; 
+//     if (!transacaoExistente) {
+//       return res.status(404).json({ mensagem: 'Transação não encontrada.' });
+//     }
 
-  try {
+//     const queryEditarTransacao = `
+//         UPDATE transacoes
+//         SET descricao = $1, valor = $2, data = $3, categoria_id = $4, tipo = $5
+//         WHERE id = $6
+//         RETURNING *
+//       `;
 
-    const transacaoExistente = await encontrarTransacaoPorId(id);
+//     const { rows: transacaoEditada } = await conectarBanco.query(queryEditarTransacao, [
+//       descricao,
+//       valor,
+//       data,
+//       categoria_id,
+//       tipo,
+//       id,
+//     ]);
 
-    if (!transacaoExistente) {
-      return res.status(404).json({ mensagem: 'Transação não encontrada.' });
-    }
+//     return res.status(200).json(transacaoEditada[0]);
+//   } catch (error) {
+//     return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+//   }
+// };
 
-    const queryRemoverTransacao = 'DELETE FROM transacoes WHERE id = $1';
-    await conectarBanco.query(queryRemoverTransacao, [id]);
+// const { encontrarTransacaoPorId } = require('../repositorios/transacoes');
 
-    return res.status(204).end();
-  } catch (error) {
-    return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
-  }
-};
-  
+// const removerTransacao = async (req, res) => {
+//   const { id } = req.params;
+
+//   try {
+
+//     const transacaoExistente = await encontrarTransacaoPorId(id);
+
+//     if (!transacaoExistente) {
+//       return res.status(404).json({ mensagem: 'Transação não encontrada.' });
+//     }
+
+//     const queryRemoverTransacao = 'DELETE FROM transacoes WHERE id = $1';
+//     await conectarBanco.query(queryRemoverTransacao, [id]);
+
+//     return res.status(204).end();
+//   } catch (error) {
+//     return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
+//   }
+// };
+
 module.exports = {
     listarTransacoes,
-    encontrarTransacaoPorId,
-    editarTransacao,
-    removerTransacao,
+    // encontrarTransacaoPorId,
+    // editarTransacao,
+    // removerTransacao
 };

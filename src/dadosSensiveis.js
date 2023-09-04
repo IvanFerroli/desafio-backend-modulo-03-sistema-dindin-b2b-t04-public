@@ -2,9 +2,8 @@
 const userBd = 'postgres';
 const hostBd = 'localhost';
 const databaseBd = 'dindin';
-const passwordBd = 'postgres';
+const passwordBd = 'Pos5428*';
 const portBd = 5432;
-
 const senhaToken = "123";
 
 

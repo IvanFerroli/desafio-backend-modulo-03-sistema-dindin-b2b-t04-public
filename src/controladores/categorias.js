@@ -1,3 +1,6 @@
+const conectarBanco = require("../config/dadosDoBanco");
+
+
 const listarCategorias = async (req, res) => {
     try {
         const query = `
@@ -9,7 +12,7 @@ const listarCategorias = async (req, res) => {
         return res.status(200).json(rows);
     } catch (error) {
         return res.status(500).json({ mensagem: "Erro interno do servidor." });
-    }
+    };
 };
 
 module.exports = {

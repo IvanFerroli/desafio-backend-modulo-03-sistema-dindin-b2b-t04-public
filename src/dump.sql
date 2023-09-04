@@ -46,3 +46,6 @@ INSERT INTO categorias (descricao) VALUES
 ('Vendas'),
 ('Outras receitas'),
 ('Outras despesas');
+
+-- Delete para testar erro nas categorias: 
+DELETE FROM categorias;
