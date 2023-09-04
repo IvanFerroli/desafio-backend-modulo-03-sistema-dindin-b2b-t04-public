@@ -1,4 +1,4 @@
--- Criação do banco de dados "dindin";
+-- Criação do banco de dados "dindin" ;
 create database dindin;
 
 --Criação das tabelas usuarios, categorias e transacoes (criar todas de uma vez para relacionar os id's):
