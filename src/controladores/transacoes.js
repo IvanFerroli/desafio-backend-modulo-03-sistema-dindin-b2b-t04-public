@@ -1,7 +1,9 @@
 const conectarBanco = require('../config/dadosDoBanco');
+const { encontrarTransacaoPorId, encontrarCategoriaPorId, cadastrarTransacaoNoBanco } = require('../repositorios/transacao');
+const { encontrarUsuarioPeloIdDoToken } = require('../repositorios/usuario');
 
 const listarTransacoes = async (req, res) => {
-    const usuarioId = req.usuarioLogado.id;
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
 
     try {
         const query = `
@@ -26,25 +28,62 @@ const listarTransacoes = async (req, res) => {
 
         return res.status(200).json(rows);
     } catch (error) {
-        console.error("Erro na listagem de transações:", error);
         return res.status(500).json({ mensagem: "Erro interno do servidor." });
     }
 };
 
-// const encontrarTransacaoPorId = async (id) => {
-//   try {
-//     const query = 'SELECT * FROM transacoes WHERE id = $1';
-//     const { rows } = await conectarBanco.query(query, [id]);
+const cadastrarTransacao = async (req, res) => {
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
+    const { tipo, descricao, valor, data, categoria_id } = req.body;
 
-//     if (rows.length === 0) {
-//       return null;
-//     }
+    if (!tipo || !descricao || !valor || !data || !categoria_id) {
+        return res.status(400).json({ mensagem: "Todos os campos obrigatórios devem ser informados." })
+    };
 
-//     return rows[0];
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+    try {
+        const { rowCount } = await encontrarCategoriaPorId(categoria_id);
+
+
+        if (rowCount === 0) {
+            return res.status(400).json({ mensagem: "A categoria especificada não existe." });
+        };
+
+        if (tipo.toLowerCase() !== "entrada" && tipo.toLowerCase() !== "saida") {
+            return res.status(400).json({ mensagem: "Por favro, informe qual é o tipo de transação que você está efetuando." })
+        };
+
+        const novosDados = { tipo, descricao, valor, data, categoria_id, usuarioId }
+        const { rows: cadastrarNoBanco } = await cadastrarTransacaoNoBanco(novosDados)
+
+        const consulta = `
+        SELECT
+            t.id,
+            t.tipo,
+            t.descricao,
+            t.valor,
+            t.data,
+            t.usuario_id,
+            t.categoria_id,
+            c.descricao AS categoria_nome
+        FROM
+            transacoes AS t
+        INNER JOIN
+            categorias AS c
+        ON
+            t.categoria_id = c.id
+        WHERE
+            t.id = $1;
+    `;
+        const { rows: transacaoCompleta } = await conectarBanco.query(consulta, [cadastrarNoBanco[0].id]);
+
+        return res.status(200).json(transacaoCompleta[0])
+
+    } catch (error) {
+        return res.status(500).json({ mensagem: "Erro interno do servidor." })
+    }
+
+};
+
 
 // const editarTransacao = async (req, res) => {
 //   const { id } = req.params;
@@ -104,6 +143,7 @@ const listarTransacoes = async (req, res) => {
 
 module.exports = {
     listarTransacoes,
+    cadastrarTransacao
     // encontrarTransacaoPorId,
     // editarTransacao,
     // removerTransacao

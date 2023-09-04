@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { senhaToken } = require('../dadosSensiveis');
-const { encontrarIdlUsuario } = require('../repositorios/encontrarUsuario');
+const { encontrarIdlUsuario } = require('../repositorios/usuario');
 
 const verificarLogin = async (req, res, next) => {
     if (!req.headers.authorization) {
