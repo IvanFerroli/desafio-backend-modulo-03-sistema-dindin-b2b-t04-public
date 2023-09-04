@@ -30,7 +30,22 @@ const encontrarEmailUsuario = (email) => {
     return verificarEmail;
 };
 
+const encontrarIdlUsuario = (id) => {
+
+    const verificarId = conectarBanco.query(`
+    SELECT 
+    	id, nome, email
+    FROM
+        usuarios
+    WHERE 
+        id = $1 
+`, [id])
+
+    return verificarId;
+};
+
 module.exports = {
     cadastrandoUsuario,
-    encontrarEmailUsuario
+    encontrarEmailUsuario,
+    encontrarIdlUsuario
 }
