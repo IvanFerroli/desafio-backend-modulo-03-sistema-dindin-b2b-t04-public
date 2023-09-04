@@ -44,8 +44,15 @@ const encontrarIdlUsuario = (id) => {
     return verificarId;
 };
 
+const encontrarUsuarioPeloIdDoToken = (req) => {
+    const usuarioId = req.usuarioLogado.id;
+
+    return usuarioId;
+};
+
 module.exports = {
     cadastrandoUsuario,
     encontrarEmailUsuario,
-    encontrarIdlUsuario
-}
+    encontrarIdlUsuario,
+    encontrarUsuarioPeloIdDoToken
+};

@@ -1,8 +1,9 @@
 const compararSenha = require('../utils/compararSenha');
 const criptografarSenha = require('../utils/criptografarSenha');
 const jwt = require('jsonwebtoken')
-const { cadastrandoUsuario, encontrarEmailUsuario } = require('../repositorios/encontrarUsuario');
+const { cadastrandoUsuario, encontrarEmailUsuario, encontrarUsuarioPeloIdDoToken } = require('../repositorios/encontrarUsuario');
 const { senhaToken } = require('../dadosSensiveis');
+const { atualizarUsuarioNoBanco } = require('../repositorios/informacoesUsuario');
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body;
@@ -81,8 +82,35 @@ const detalharUsuario = async (req, res) => {
     return res.status(200).json(req.usuarioLogado);
 };
 
+const atualizarUsuario = async (req, res) => {
+    const { nome, email, senha } = req.body;
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
+    const usuarioEmail = req.usuarioLogado.email;
+
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ mensagem: "Todos os campos são obrigatórios." });
+    };
+    if (email === usuarioEmail) {
+        return res.status(400).json({ mensagem: "O e-mail informado já está sendo utilizado por outro usuário." })
+    };
+
+    try {
+
+        const senhaCriptografada = await criptografarSenha(senha);
+        const novosDados = { nome, email, senhaCriptografada, usuarioId }
+        const atualizarNoBanco = await atualizarUsuarioNoBanco(novosDados);
+
+        return res.status(204).json();
+
+
+    } catch (error) {
+        return res.status(500).json({ mensagem: "Erro interno do servidor." })
+    };
+};
+
 module.exports = {
     cadastrarUsuario,
     login,
-    detalharUsuario
-}
+    detalharUsuario,
+    atualizarUsuario
+};
