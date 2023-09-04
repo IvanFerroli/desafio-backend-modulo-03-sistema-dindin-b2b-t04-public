@@ -31,9 +31,11 @@ const cadastrarTransacaoNoBanco = (novosDados) => {
     `, [descricao, valor, data, categoria_id, tipo, usuarioId]);
 
     return queryCadastrarNoBanco
-}
+};
+
+
 module.exports = {
     encontrarTransacaoPorId,
     encontrarCategoriaPorId,
-    cadastrarTransacaoNoBanco
+    cadastrarTransacaoNoBanco,
 }
