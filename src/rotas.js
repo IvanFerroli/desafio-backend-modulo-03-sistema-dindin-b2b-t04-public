@@ -12,6 +12,8 @@ rotas.post('/login', login);
 
 rotas.use(verificarLogin);
 
+
+rotas.get('/transacao', listarTransacoes)
 rotas.get('/usuario', detalharUsuario);
 rotas.get('/categoria', listarCategorias);
 
