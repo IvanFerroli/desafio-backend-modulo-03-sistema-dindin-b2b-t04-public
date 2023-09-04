@@ -198,11 +198,46 @@ const removerTransacao = async (req, res) => {
     }
 };
 
+
+const obterExtrato = async (req, res) => {
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
+
+    try {
+        const queryObterExtrato = `
+    SELECT 
+    SUM (valor) 
+    AS 
+        saldo 
+    FROM 
+        transacoes 
+    WHERE 
+        usuario_id = $1 
+    AND 
+        tipo = $2 ;
+`;
+
+        const entrada = await conectarBanco.query(queryObterExtrato, [usuarioId, "entrada"]);
+        const saida = await conectarBanco.query(queryObterExtrato, [usuarioId, "saida"]);
+
+
+        return res.status(200).json({
+            entrada: entrada.rows[0].saldo ?? 0,
+            saida: saida.rows[0].saldo ?? 0
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ mensagem: "Erro interno do servidor." })
+    };
+
+};
+
 module.exports = {
     listarTransacoes,
     cadastrarTransacao,
     detalharTransacao,
     editarTransacao,
-    removerTransacao
+    removerTransacao,
+    obterExtrato
     // encontrarTransacaoPorId,
 };
