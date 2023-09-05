@@ -74,9 +74,11 @@ const login = async (req, res) => {
 
 
 const detalharUsuario = async (req, res) => {
+    //tirar dúvida na monitoria sobre a resposta.
     if (!req.usuarioLogado) {
         return res.status(401).json({ mensagem: "Para acessar este recurso um token de autenticação válido deve ser enviado." });
     };
+
     return res.status(200).json(req.usuarioLogado);
 };
 
@@ -88,6 +90,9 @@ const atualizarUsuario = async (req, res) => {
     if (!nome || !email || !senha) {
         return res.status(400).json({ mensagem: "Todos os campos são obrigatórios." });
     };
+
+    //Validação do email não está entrando;
+
     if (email === usuarioEmail) {
         return res.status(400).json({ mensagem: "O e-mail informado já está sendo utilizado por outro usuário." })
     };
@@ -102,6 +107,7 @@ const atualizarUsuario = async (req, res) => {
 
 
     } catch (error) {
+        console.log((error.message));
         return res.status(500).json({ mensagem: "Erro interno do servidor." })
     };
 };

@@ -25,21 +25,4 @@ rotas.post('/transacao', cadastrarTransacao);
 rotas.put('/transacao/:id', editarTransacao);
 rotas.delete('/transacao/:id', removerTransacao);
 
-
-
-// rotas.get('/transacao', listarTransacoes);
-// rotas.get('/transacao/:id', async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const transacao = await encontrarTransacaoPorId(id);
-//     if (!transacao) {
-//       return res.status(404).json({ mensagem: 'Transação não encontrada.' });
-//     }
-//     return res.status(200).json(transacao);
-//   } catch (error) {
-//     return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
-//   }
-// });
-
-
 module.exports = rotas;

@@ -129,21 +129,23 @@ const editarTransacao = async (req, res) => {
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
 
     if (!descricao || !valor || !data || !categoria_id || !tipo) {
-        return res.status(400).json({ mensagem: "Todos os campos obrigatórios devem ser informados." })
+        return res.status(400).json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
     };
 
     try {
         const { rowCount } = await encontrarCategoriaPorId(categoria_id);
         const { rows: transacaoExistente } = await encontrarTransacaoPorId(id);
-
+        //validar em intermediarios
         if (rowCount < 1) {
             return res.status(400).json({ mensagem: "A categoria especificada não existe." });
-        }
+        };
+        //validar em intermediarios
         if (transacaoExistente[0].usuario_id !== usuarioId) {
             return res.status(404).json({ mensagem: "Transação não encontrada." })
         };
+        //validar em intermediarios
         if (tipo.toLowerCase() !== "entrada" && tipo.toLowerCase() !== "saida") {
-            return res.status(400).json({ mensagem: "Por favro, informe corretamente qual é o tipo de transação que você está efetuando." })
+            return res.status(400).json({ mensagem: "Por favor, informe corretamente qual é o tipo de transação que você está efetuando." });
         };
 
         const queryEditarTransacao = `
@@ -239,5 +241,4 @@ module.exports = {
     editarTransacao,
     removerTransacao,
     obterExtrato
-    // encontrarTransacaoPorId,
 };
