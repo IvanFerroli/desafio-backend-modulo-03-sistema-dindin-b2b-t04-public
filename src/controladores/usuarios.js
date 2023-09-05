@@ -85,16 +85,18 @@ const detalharUsuario = async (req, res) => {
 const atualizarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body;
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
-    const usuarioEmail = req.usuarioLogado.email;
+    const emailDoToken = req.usuarioLogado.email;
+    const { rows } = await encontrarEmailUsuario(email);
+    const emailDoBanco = rows[0].email
 
     if (!nome || !email || !senha) {
         return res.status(400).json({ mensagem: "Todos os campos são obrigatórios." });
     };
 
-    //Validação do email não está entrando;
-
-    if (email === usuarioEmail) {
-        return res.status(400).json({ mensagem: "O e-mail informado já está sendo utilizado por outro usuário." })
+    if (email !== emailDoToken) {
+        if (emailDoBanco) {
+            return res.status(400).json({ mensagem: "O e-mail informado já está sendo utilizado por outro usuário." })
+        }
     };
 
     try {
@@ -107,7 +109,6 @@ const atualizarUsuario = async (req, res) => {
 
 
     } catch (error) {
-        console.log((error.message));
         return res.status(500).json({ mensagem: "Erro interno do servidor." })
     };
 };
