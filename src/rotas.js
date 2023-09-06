@@ -2,9 +2,9 @@ const express = require('express');
 const { cadastrarUsuario, login, detalharUsuario, atualizarUsuario } = require('./controladores/usuarios');
 
 
-const verificarLogin = require('./intermediarios/verificarLogin');
+const { verificarLogin } = require('./intermediarios/verificarLogin');
 const { listarCategorias } = require('./controladores/categorias');
-const { listarTransacoes, encontrarTransacaoPorId, editarTransacao, cadastrarTransacao, detalharTransacao, obterExtrato } = require('./controladores/transacoes.js');
+const { listarTransacoes, editarTransacao, cadastrarTransacao, detalharTransacao, obterExtrato } = require('./controladores/transacoes.js');
 const { removerTransacao } = require('./controladores/transacoes.js');
 
 const rotas = express();
