@@ -1,6 +1,7 @@
 const conectarBanco = require('../config/dadosDoBanco');
 const { encontrarTransacaoPorId, encontrarCategoriaPorId, cadastrarTransacaoNoBanco } = require('../repositorios/transacao');
 const { encontrarUsuarioPeloIdDoToken } = require('../repositorios/usuario');
+const { validarTipoTransacao, validarCamposObrigatorios } = require('./intermediarios/validacoesTransacoes'); // Importe as funções de validação
 
 const listarTransacoes = async (req, res) => {
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
@@ -32,8 +33,6 @@ const listarTransacoes = async (req, res) => {
     }
 };
 
-
-
 const detalharTransacao = async (req, res) => {
     const { id } = req.params;
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
@@ -63,7 +62,7 @@ const detalharTransacao = async (req, res) => {
 
         if (rowCount === 0) {
             return res.status(404).json({ mensagem: "Transação não encontrada." });
-        };
+        }
         return res.status(200).json(rows[0]);
     } catch (error) {
         return res.status(500).json({ mensagem: "Erro interno do servidor." });
@@ -74,24 +73,19 @@ const cadastrarTransacao = async (req, res) => {
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
     const { tipo, descricao, valor, data, categoria_id } = req.body;
 
-    if (!tipo || !descricao || !valor || !data || !categoria_id) {
-        return res.status(400).json({ mensagem: "Todos os campos obrigatórios devem ser informados." })
-    };
+    if (!validarTipoTransacao(tipo) || !validarCamposObrigatorios(req.body)) {
+        return res.status(400).json({ mensagem: "Campos inválidos ou faltando." });
+    }
 
     try {
         const { rowCount } = await encontrarCategoriaPorId(categoria_id);
 
-
         if (rowCount === 0) {
             return res.status(400).json({ mensagem: "A categoria especificada não existe." });
-        };
+        }
 
-        if (tipo.toLowerCase() !== "entrada" && tipo.toLowerCase() !== "saida") {
-            return res.status(400).json({ mensagem: "Por favro, informe corretamente qual é o tipo de transação que você está efetuando." })
-        };
-
-        const novosDados = { tipo, descricao, valor, data, categoria_id, usuarioId }
-        const { rows: cadastrarNoBanco } = await cadastrarTransacaoNoBanco(novosDados)
+        const novosDados = { tipo, descricao, valor, data, categoria_id, usuarioId };
+        const { rows: cadastrarNoBanco } = await cadastrarTransacaoNoBanco(novosDados);
 
         const consulta = `
         SELECT
@@ -114,39 +108,28 @@ const cadastrarTransacao = async (req, res) => {
     `;
         const { rows: transacaoCompleta } = await conectarBanco.query(consulta, [cadastrarNoBanco[0].id]);
 
-        return res.status(200).json(transacaoCompleta[0])
-
+        return res.status(200).json(transacaoCompleta[0]);
     } catch (error) {
-        return res.status(500).json({ mensagem: "Erro interno do servidor." })
+        return res.status(500).json({ mensagem: "Erro interno do servidor." });
     }
-
 };
-
 
 const editarTransacao = async (req, res) => {
     const { id } = req.params;
     const { descricao, valor, data, categoria_id, tipo } = req.body;
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
 
-    if (!descricao || !valor || !data || !categoria_id || !tipo) {
-        return res.status(400).json({ mensagem: "Todos os campos obrigatórios devem ser informados." });
-    };
+    if (!validarTipoTransacao(tipo) || !validarCamposObrigatorios(req.body)) {
+        return res.status(400).json({ mensagem: "Campos inválidos ou faltando." });
+    }
 
     try {
         const { rowCount } = await encontrarCategoriaPorId(categoria_id);
         const { rows: transacaoExistente } = await encontrarTransacaoPorId(id);
-        //validar em intermediarios
-        if (rowCount < 1) {
-            return res.status(400).json({ mensagem: "A categoria especificada não existe." });
-        };
-        //validar em intermediarios
-        if (transacaoExistente[0].usuario_id !== usuarioId) {
-            return res.status(404).json({ mensagem: "Transação não encontrada." })
-        };
-        //validar em intermediarios
-        if (tipo.toLowerCase() !== "entrada" && tipo.toLowerCase() !== "saida") {
-            return res.status(400).json({ mensagem: "Por favor, informe corretamente qual é o tipo de transação que você está efetuando." });
-        };
+
+        if (rowCount < 1 || transacaoExistente[0].usuario_id !== usuarioId) {
+            return res.status(404).json({ mensagem: "Transação não encontrada." });
+        }
 
         const queryEditarTransacao = `
         UPDATE transacoes
@@ -166,7 +149,7 @@ const editarTransacao = async (req, res) => {
 
         if (rowCount === 0) {
             return res.status(404).json({ mensagem: "Transação não encontrada." });
-        };
+        }
 
         return res.status(204).json();
     } catch (error) {
@@ -174,22 +157,16 @@ const editarTransacao = async (req, res) => {
     }
 };
 
-
 const removerTransacao = async (req, res) => {
     const { id } = req.params;
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
 
     try {
-
         const { rows: transacaoExistente, rowCount } = await encontrarTransacaoPorId(id);
 
-        if (rowCount < 1) {
-            return res.status(404).json({ mensagem: 'Transação não encontrada.' });
-        };
-
-        if (transacaoExistente[0].usuario_id !== usuarioId || rowCount < 1) {
-            return res.status(404).json({ mensagem: "Transação não encontrada." })
-        };
+        if (rowCount < 1 || transacaoExistente[0].usuario_id !== usuarioId) {
+            return res.status(404).json({ mensagem: "Transação não encontrada." });
+        }
 
         const queryRemoverTransacao = 'DELETE FROM transacoes WHERE id = $1 AND usuario_id = $2';
         await conectarBanco.query(queryRemoverTransacao, [id, usuarioId]);
@@ -199,7 +176,6 @@ const removerTransacao = async (req, res) => {
         return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
     }
 };
-
 
 const obterExtrato = async (req, res) => {
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
@@ -221,17 +197,49 @@ const obterExtrato = async (req, res) => {
         const entrada = await conectarBanco.query(queryObterExtrato, [usuarioId, "entrada"]);
         const saida = await conectarBanco.query(queryObterExtrato, [usuarioId, "saida"]);
 
-
         return res.status(200).json({
             entrada: entrada.rows[0].saldo ?? 0,
-            saida: saida.rows[0].saldo ?? 0
+            saida: saida.rows[0].saldo ?? 0,
         });
-
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ mensagem: "Erro interno do servidor." })
-    };
+        return res.status(500).json({ mensagem: "Erro interno do servidor." });
+    }
+};
 
+const listarTransacoesPorCategoria = async (req, res) => {
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
+    const categoriasFiltradas = req.query.filtro; // Obtém as categorias a serem filtradas a partir dos parâmetros da consulta
+
+    try {
+        let query = `
+            SELECT
+                t.id,
+                t.tipo,
+                t.descricao,
+                t.valor,
+                t.data,
+                t.usuario_id,
+                t.categoria_id,
+                c.descricao AS categoria_nome
+            FROM
+                transacoes t
+            JOIN
+                categorias c ON t.categoria_id = c.id
+            WHERE
+                t.usuario_id = $1
+        `;
+
+        if (categoriasFiltradas && categoriasFiltradas.length > 0) {
+            query += ` AND c.descricao IN (${categoriasFiltradas.map((_, i) => `$${i + 2}`).join(', ')})`;
+        }
+
+        const { rows } = await conectarBanco.query(query, [usuarioId, ...categoriasFiltradas]);
+
+        return res.status(200).json(rows);
+    } catch (error) {
+        return res.status(500).json({ mensagem: "Erro interno do servidor." });
+    }
 };
 
 module.exports = {
@@ -240,5 +248,6 @@ module.exports = {
     detalharTransacao,
     editarTransacao,
     removerTransacao,
-    obterExtrato
+    obterExtrato,
+    listarTransacoesPorCategoria,
 };
