@@ -46,7 +46,6 @@ const encontrarIdlUsuario = (id) => {
 
 const encontrarUsuarioPeloIdDoToken = (req) => {
     const usuarioId = req.usuarioLogado.id;
-
     return usuarioId;
 };
 

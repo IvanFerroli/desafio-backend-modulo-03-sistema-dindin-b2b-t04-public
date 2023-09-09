@@ -1,4 +1,9 @@
 const validarTipoTransacao = (tipo) => {
+
+    if (!tipo) {
+        return false
+    }
+
     return tipo.toLowerCase() === "entrada" || tipo.toLowerCase() === "saida";
 };
 

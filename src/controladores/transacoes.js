@@ -1,7 +1,7 @@
 const conectarBanco = require('../config/dadosDoBanco');
 const { encontrarTransacaoPorId, encontrarCategoriaPorId, cadastrarTransacaoNoBanco } = require('../repositorios/transacao');
 const { encontrarUsuarioPeloIdDoToken } = require('../repositorios/usuario');
-const { validarTipoTransacao, validarCamposObrigatorios } = require('./intermediarios/validacoesTransacoes'); // Importe as funções de validação
+const { validarTipoTransacao, validarCamposObrigatorios } = require('../intermediarios/validacoesTransacoes');
 
 const listarTransacoes = async (req, res) => {
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
@@ -71,13 +71,17 @@ const detalharTransacao = async (req, res) => {
 
 const cadastrarTransacao = async (req, res) => {
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
-    const { tipo, descricao, valor, data, categoria_id } = req.body;
-
-    if (!validarTipoTransacao(tipo) || !validarCamposObrigatorios(req.body)) {
-        return res.status(400).json({ mensagem: "Campos inválidos ou faltando." });
-    }
+    let { tipo, descricao, valor, data, categoria_id } = req.body;
 
     try {
+
+        if (!validarTipoTransacao(tipo) || !validarCamposObrigatorios(req.body)) {
+            return res.status(400).json({ mensagem: "Campos inválidos ou faltando." });
+        }
+
+        tipo = tipo.toLowerCase();
+
+
         const { rowCount } = await encontrarCategoriaPorId(categoria_id);
 
         if (rowCount === 0) {
@@ -110,6 +114,8 @@ const cadastrarTransacao = async (req, res) => {
 
         return res.status(200).json(transacaoCompleta[0]);
     } catch (error) {
+        console.log(error.message);
+
         return res.status(500).json({ mensagem: "Erro interno do servidor." });
     }
 };
@@ -127,7 +133,8 @@ const editarTransacao = async (req, res) => {
         const { rowCount } = await encontrarCategoriaPorId(categoria_id);
         const { rows: transacaoExistente } = await encontrarTransacaoPorId(id);
 
-        if (rowCount < 1 || transacaoExistente[0].usuario_id !== usuarioId) {
+
+        if (rowCount < 1 || transacaoExistente.length === 0 || transacaoExistente[0].usuario_id !== usuarioId) {
             return res.status(404).json({ mensagem: "Transação não encontrada." });
         }
 
@@ -153,6 +160,7 @@ const editarTransacao = async (req, res) => {
 
         return res.status(204).json();
     } catch (error) {
+        console.log(error.message);
         return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
     }
 };

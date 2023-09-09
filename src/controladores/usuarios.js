@@ -74,11 +74,6 @@ const login = async (req, res) => {
 
 
 const detalharUsuario = async (req, res) => {
-    if (!req.usuarioLogado) {
-        return res.status(401).json({ mensagem: "Para acessar este recurso um token de autenticação válido deve ser enviado." });
-    };
-
-
     return res.status(200).json(req.usuarioLogado);
 };
 
@@ -87,19 +82,25 @@ const atualizarUsuario = async (req, res) => {
     const usuarioId = encontrarUsuarioPeloIdDoToken(req);
     const emailDoToken = req.usuarioLogado.email;
     const { rows } = await encontrarEmailUsuario(email);
-    const emailDoBanco = rows[0].email
+
 
     if (!nome || !email || !senha) {
         return res.status(400).json({ mensagem: "Todos os campos são obrigatórios." });
     };
 
-    if (email !== emailDoToken) {
-        if (emailDoBanco) {
-            return res.status(400).json({ mensagem: "O e-mail informado já está sendo utilizado por outro usuário." })
-        }
-    };
 
     try {
+
+        const emailDoBanco = rows[0].email;
+
+
+        if (email !== emailDoToken) {
+            if (emailDoBanco) {
+                return res.status(400).json({ mensagem: "O e-mail informado já está sendo utilizado por outro usuário." })
+            }
+        };
+
+
 
         const senhaCriptografada = await criptografarSenha(senha);
         const novosDados = { nome, email, senhaCriptografada, usuarioId }
