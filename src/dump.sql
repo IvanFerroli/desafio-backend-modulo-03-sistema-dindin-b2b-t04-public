@@ -1,4 +1,4 @@
--- Criação do banco de dados "dindin";
+-- Criação do banco de dados "dindin" ;
 create database dindin;
 
 --Criação das tabelas usuarios, categorias e transacoes (criar todas de uma vez para relacionar os id's):
@@ -46,3 +46,6 @@ INSERT INTO categorias (descricao) VALUES
 ('Vendas'),
 ('Outras receitas'),
 ('Outras despesas');
+
+-- Delete para testar erro nas categorias: 
+DELETE FROM categorias;

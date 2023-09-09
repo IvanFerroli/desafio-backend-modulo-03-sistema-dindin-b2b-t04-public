@@ -1,13 +1,15 @@
 const compararSenha = require('../utils/compararSenha');
 const criptografarSenha = require('../utils/criptografarSenha');
 const jwt = require('jsonwebtoken')
-const { cadastrandoUsuario, encontrarEmailUsuario } = require('../repositorios/encontrarUsuario');
+const { cadastrandoUsuario, encontrarEmailUsuario, encontrarUsuarioPeloIdDoToken } = require('../repositorios/usuario');
 const { senhaToken } = require('../dadosSensiveis');
+const { atualizarUsuarioNoBanco } = require('../repositorios/informacoesUsuario');
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body;
 
     if (!nome || !email || !senha) {
+
         return res.status(400).json({ mensagem: "Por favor, preencha todos os campos." })
     };
 
@@ -15,7 +17,9 @@ const cadastrarUsuario = async (req, res) => {
 
         const emailJaCadastrado = await encontrarEmailUsuario(email);
 
+
         if (emailJaCadastrado.rowCount > 0) {
+
             return res.status(400).json({ mensagem: "Já existe usuário cadastrado com o e-mail informado." });
         }
 
@@ -70,14 +74,49 @@ const login = async (req, res) => {
 
 
 const detalharUsuario = async (req, res) => {
-    if (!req.usuarioLogado) {
-        return res.status(401).json({ mensagem: "Para acessar este recurso um token de autenticação válido deve ser enviado." });
-    };
     return res.status(200).json(req.usuarioLogado);
+};
+
+const atualizarUsuario = async (req, res) => {
+    const { nome, email, senha } = req.body;
+    const usuarioId = encontrarUsuarioPeloIdDoToken(req);
+    const emailDoToken = req.usuarioLogado.email;
+    const { rows } = await encontrarEmailUsuario(email);
+
+
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ mensagem: "Todos os campos são obrigatórios." });
+    };
+
+
+    try {
+
+        const emailDoBanco = rows[0].email;
+
+
+        if (email !== emailDoToken) {
+            if (emailDoBanco) {
+                return res.status(400).json({ mensagem: "O e-mail informado já está sendo utilizado por outro usuário." })
+            }
+        };
+
+
+
+        const senhaCriptografada = await criptografarSenha(senha);
+        const novosDados = { nome, email, senhaCriptografada, usuarioId }
+        const atualizarNoBanco = await atualizarUsuarioNoBanco(novosDados);
+
+        return res.status(204).json();
+
+
+    } catch (error) {
+        return res.status(500).json({ mensagem: "Erro interno do servidor." })
+    };
 };
 
 module.exports = {
     cadastrarUsuario,
     login,
-    detalharUsuario
-}
+    detalharUsuario,
+    atualizarUsuario
+};
